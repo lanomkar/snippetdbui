@@ -1,6 +1,7 @@
 import React from "react";
 import SnippetCard from "./SnippetCard";
 import { Button } from "@/components/ui/button";
+import AddSnippetModal from "./AddSnippetModal";
 import { Plus, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -51,6 +52,8 @@ const SnippetList = ({
   onAddSnippet = () => {},
   onSearch = () => {},
 }: SnippetListProps) => {
+  const [showAddModal, setShowAddModal] = React.useState(false);
+
   return (
     <div className="h-full w-full bg-gray-50 dark:bg-gray-900 p-6">
       <div className="flex items-center justify-between mb-6">
@@ -63,7 +66,7 @@ const SnippetList = ({
               onChange={(e) => onSearch(e.target.value)}
             />
           </div>
-          <Button onClick={onAddSnippet}>
+          <Button onClick={() => setShowAddModal(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Add Snippet
           </Button>
@@ -87,6 +90,14 @@ const SnippetList = ({
           />
         ))}
       </div>
+      <AddSnippetModal
+        open={showAddModal}
+        onOpenChange={setShowAddModal}
+        onSubmit={(data) => {
+          console.log("New snippet:", data);
+          onAddSnippet();
+        }}
+      />
     </div>
   );
 };
