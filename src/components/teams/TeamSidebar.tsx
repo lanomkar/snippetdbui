@@ -25,6 +25,7 @@ interface TeamSidebarProps {
   onAddTeam?: () => void;
   onAddCategory?: (teamId: string) => void;
   onSelectCategory?: (teamId: string, categoryId: string) => void;
+  selectedCategory?: string | null;
 }
 
 const TeamSidebar = ({
@@ -53,24 +54,33 @@ const TeamSidebar = ({
   onAddTeam = () => {},
   onAddCategory = () => {},
   onSelectCategory = () => {},
+  selectedCategory = null,
 }: TeamSidebarProps) => {
   const [showAddTeamModal, setShowAddTeamModal] = React.useState(false);
 
   const renderCategory = (category: Category, teamId: string, depth = 0) => {
+    const isSelected = category.id === selectedCategory;
+
     return (
       <div key={category.id} className={`ml-${depth * 4}`}>
         <Collapsible>
           <div
-            className="flex items-center justify-between py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md cursor-pointer"
+            className={`flex items-center justify-between py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md cursor-pointer ${isSelected ? "bg-gray-100 dark:bg-gray-800" : ""}`}
             onClick={() => onSelectCategory(teamId, category.id)}
           >
             <div className="flex items-center gap-2">
               {category.subCategories && category.subCategories.length > 0 && (
-                <CollapsibleTrigger>
+                <CollapsibleTrigger
+                  className={`${isSelected ? "text-primary" : ""}`}
+                >
                   <ChevronDown className="h-4 w-4" />
                 </CollapsibleTrigger>
               )}
-              <span className="text-sm font-medium">{category.name}</span>
+              <span
+                className={`text-sm font-medium ${isSelected ? "text-primary" : ""}`}
+              >
+                {category.name}
+              </span>
               <span className="text-xs text-gray-500">
                 ({category.snippetCount})
               </span>
@@ -126,6 +136,7 @@ const TeamSidebar = ({
           </div>
         ))}
       </ScrollArea>
+
       <AddTeamModal
         open={showAddTeamModal}
         onOpenChange={setShowAddTeamModal}

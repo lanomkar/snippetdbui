@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import DashboardHeader from "./layout/DashboardHeader";
 import TeamSidebar from "./teams/TeamSidebar";
 import SnippetList from "./snippets/SnippetList";
@@ -24,6 +24,7 @@ interface HomeProps {
   snippets?: Array<{
     id: string;
     title: string;
+    categoryId: string;
     description: string;
     language: string;
     code: string;
@@ -60,6 +61,7 @@ const Home = ({
   snippets = [
     {
       id: "1",
+      categoryId: "2",
       title: "React useState Hook",
       description: "Example of using React's useState hook",
       language: "typescript",
@@ -68,6 +70,7 @@ const Home = ({
     },
     {
       id: "2",
+      categoryId: "2",
       title: "Array Map Function",
       description: "How to use array map method",
       language: "javascript",
@@ -76,6 +79,16 @@ const Home = ({
     },
   ],
 }: HomeProps) => {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  const filteredSnippets = snippets.filter(
+    (snippet) => !selectedCategory || snippet.categoryId === selectedCategory,
+  );
+
+  const handleCategorySelect = (teamId: string, categoryId: string) => {
+    setSelectedCategory(categoryId);
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <DashboardHeader
@@ -95,14 +108,13 @@ const Home = ({
           onAddCategory={(teamId) =>
             console.log("Add category clicked:", teamId)
           }
-          onSelectCategory={(teamId, categoryId) =>
-            console.log("Category selected:", teamId, categoryId)
-          }
+          onSelectCategory={handleCategorySelect}
+          selectedCategory={selectedCategory}
         />
 
         <main className="flex-1 overflow-auto">
           <SnippetList
-            snippets={snippets}
+            snippets={filteredSnippets}
             onAddSnippet={() => console.log("Add snippet clicked")}
             onSearch={(query) => console.log("Search query:", query)}
           />
