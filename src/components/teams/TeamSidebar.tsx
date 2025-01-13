@@ -8,6 +8,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import AddTeamModal from "./AddTeamModal";
+import AddCategoryModal from "./AddCategoryModal";
 
 interface Category {
   id: string;
@@ -23,7 +24,7 @@ interface TeamSidebarProps {
     categories: Category[];
   }>;
   onAddTeam?: () => void;
-  onAddCategory?: (teamId: string) => void;
+  onAddCategory?: (teamId: string, parentCategoryId?: string) => void;
   onSelectCategory?: (teamId: string, categoryId: string) => void;
   selectedCategory?: string | null;
 }
@@ -57,6 +58,21 @@ const TeamSidebar = ({
   selectedCategory = null,
 }: TeamSidebarProps) => {
   const [showAddTeamModal, setShowAddTeamModal] = React.useState(false);
+  const [showAddCategoryModal, setShowAddCategoryModal] = React.useState(false);
+  const [currentTeamId, setCurrentTeamId] = React.useState<string>("");
+  const [currentParentCategory, setCurrentParentCategory] = React.useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
+  const handleAddCategory = (
+    teamId: string,
+    parentCategory?: { id: string; name: string },
+  ) => {
+    setCurrentTeamId(teamId);
+    setCurrentParentCategory(parentCategory || null);
+    setShowAddCategoryModal(true);
+  };
 
   const renderCategory = (category: Category, teamId: string, depth = 0) => {
     const isSelected = category.id === selectedCategory;
@@ -66,9 +82,11 @@ const TeamSidebar = ({
         <Collapsible>
           <div
             className={`flex items-center justify-between py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md cursor-pointer ${isSelected ? "bg-gray-100 dark:bg-gray-800" : ""}`}
-            onClick={() => onSelectCategory(teamId, category.id)}
           >
-            <div className="flex items-center gap-2">
+            <div
+              className="flex items-center gap-2 flex-1"
+              onClick={() => onSelectCategory(teamId, category.id)}
+            >
               {category.subCategories && category.subCategories.length > 0 && (
                 <CollapsibleTrigger
                   className={`${isSelected ? "text-primary" : ""}`}
@@ -85,6 +103,20 @@ const TeamSidebar = ({
                 ({category.snippetCount})
               </span>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAddCategory(teamId, {
+                  id: category.id,
+                  name: category.name,
+                });
+              }}
+            >
+              <Plus className="h-3 w-3" />
+            </Button>
           </div>
 
           {category.subCategories && (
@@ -122,7 +154,7 @@ const TeamSidebar = ({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => onAddCategory(team.id)}
+                onClick={() => handleAddCategory(team.id)}
               >
                 <FolderPlus className="h-4 w-4" />
               </Button>
@@ -144,6 +176,21 @@ const TeamSidebar = ({
           console.log("New team:", data);
           onAddTeam();
         }}
+      />
+
+      <AddCategoryModal
+        open={showAddCategoryModal}
+        onOpenChange={setShowAddCategoryModal}
+        onSubmit={(data) => {
+          onAddCategory(currentTeamId, currentParentCategory?.id);
+          console.log("New category:", {
+            ...data,
+            teamId: currentTeamId,
+            parentCategoryId: currentParentCategory?.id,
+          });
+        }}
+        isSubcategory={!!currentParentCategory}
+        parentCategoryName={currentParentCategory?.name}
       />
     </div>
   );
