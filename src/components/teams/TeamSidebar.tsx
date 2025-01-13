@@ -7,6 +7,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import AddTeamModal from "./AddTeamModal";
 
 interface Category {
   id: string;
@@ -53,6 +54,8 @@ const TeamSidebar = ({
   onAddCategory = () => {},
   onSelectCategory = () => {},
 }: TeamSidebarProps) => {
+  const [showAddTeamModal, setShowAddTeamModal] = React.useState(false);
+
   const renderCategory = (category: Category, teamId: string, depth = 0) => {
     return (
       <div key={category.id} className={`ml-${depth * 4}`}>
@@ -94,7 +97,7 @@ const TeamSidebar = ({
         <Button
           variant="outline"
           className="w-full justify-start gap-2"
-          onClick={onAddTeam}
+          onClick={() => setShowAddTeamModal(true)}
         >
           <Plus className="h-4 w-4" />
           Add Team
@@ -123,6 +126,14 @@ const TeamSidebar = ({
           </div>
         ))}
       </ScrollArea>
+      <AddTeamModal
+        open={showAddTeamModal}
+        onOpenChange={setShowAddTeamModal}
+        onSubmit={(data) => {
+          console.log("New team:", data);
+          onAddTeam();
+        }}
+      />
     </div>
   );
 };
