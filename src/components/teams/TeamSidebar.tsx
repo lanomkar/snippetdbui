@@ -1,0 +1,130 @@
+import React from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, FolderPlus, Plus } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+
+interface Category {
+  id: string;
+  name: string;
+  snippetCount: number;
+  subCategories?: Category[];
+}
+
+interface TeamSidebarProps {
+  teams?: Array<{
+    id: string;
+    name: string;
+    categories: Category[];
+  }>;
+  onAddTeam?: () => void;
+  onAddCategory?: (teamId: string) => void;
+  onSelectCategory?: (teamId: string, categoryId: string) => void;
+}
+
+const TeamSidebar = ({
+  teams = [
+    {
+      id: "1",
+      name: "Personal Team",
+      categories: [
+        {
+          id: "1",
+          name: "JavaScript",
+          snippetCount: 5,
+          subCategories: [
+            { id: "2", name: "React", snippetCount: 3 },
+            { id: "3", name: "Vue", snippetCount: 2 },
+          ],
+        },
+        {
+          id: "4",
+          name: "Python",
+          snippetCount: 3,
+        },
+      ],
+    },
+  ],
+  onAddTeam = () => {},
+  onAddCategory = () => {},
+  onSelectCategory = () => {},
+}: TeamSidebarProps) => {
+  const renderCategory = (category: Category, teamId: string, depth = 0) => {
+    return (
+      <div key={category.id} className={`ml-${depth * 4}`}>
+        <Collapsible>
+          <div
+            className="flex items-center justify-between py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md cursor-pointer"
+            onClick={() => onSelectCategory(teamId, category.id)}
+          >
+            <div className="flex items-center gap-2">
+              {category.subCategories && category.subCategories.length > 0 && (
+                <CollapsibleTrigger>
+                  <ChevronDown className="h-4 w-4" />
+                </CollapsibleTrigger>
+              )}
+              <span className="text-sm font-medium">{category.name}</span>
+              <span className="text-xs text-gray-500">
+                ({category.snippetCount})
+              </span>
+            </div>
+          </div>
+
+          {category.subCategories && (
+            <CollapsibleContent>
+              <div className="ml-4">
+                {category.subCategories.map((subCategory) =>
+                  renderCategory(subCategory, teamId, depth + 1),
+                )}
+              </div>
+            </CollapsibleContent>
+          )}
+        </Collapsible>
+      </div>
+    );
+  };
+
+  return (
+    <div className="w-[280px] h-full border-r bg-white dark:bg-gray-900 flex flex-col">
+      <div className="p-4 border-b">
+        <Button
+          variant="outline"
+          className="w-full justify-start gap-2"
+          onClick={onAddTeam}
+        >
+          <Plus className="h-4 w-4" />
+          Add Team
+        </Button>
+      </div>
+
+      <ScrollArea className="flex-1">
+        {teams.map((team) => (
+          <div key={team.id} className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-semibold">{team.name}</h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onAddCategory(team.id)}
+              >
+                <FolderPlus className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-1">
+              {team.categories.map((category) =>
+                renderCategory(category, team.id),
+              )}
+            </div>
+          </div>
+        ))}
+      </ScrollArea>
+    </div>
+  );
+};
+
+export default TeamSidebar;
